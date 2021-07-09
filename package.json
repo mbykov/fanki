@@ -1,0 +1,17 @@
+{
+  "name": "sanki",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mbykov <m.bykov@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^10.0.0",
+    "inquirer": "^8.1.1",
+    "json5": "^2.2.0"
+  }
+}
