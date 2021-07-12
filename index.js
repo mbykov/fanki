@@ -1,18 +1,33 @@
-// const inquirer = require('inquirer');
 const log = console.log
-const fse = require('fs-extra')
-const path = require("path")
-const JSON5 = require('json5')
-
+import { LowSync, JSONFileSync } from 'lowdb'
+import fse from 'fs-extra'
+import JSON5 from 'json5'
+import {fileURLToPath} from 'node:url';
+// import {resolve} from 'path'
+import os from 'os'
+// const readline = require('readline');
+import readline from 'readline'
 
 let config = readConf()
 log('_CONF', config)
 
-let heapPath = path.resolve(__dirname, config.heap)
+// heapPath = path.resolve(heapPath, 'Greek/lushing-01.md')
+
+let filename = config.heap + '/Greek/lushing-01.md'
+
+// let heapPath_ = resolve(__dirname, config.heap)
+const heap = new URL(filename, import.meta.url);
+let heapPath = heap.pathname
 log('_heapPath', heapPath)
 
 let cards = getCards(heapPath)
 log('_CARDS_', cards.length)
+
+const homedir = os.homedir();
+log('_HOMEDIR_', homedir)
+
+
+
 
 // =========== HOME
 process.env['HOME']
@@ -48,7 +63,6 @@ let card = {
   }
 }
 
-const readline = require('readline');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
@@ -87,10 +101,8 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-
 function getCards(heapPath) {
   try {
-    heapPath = path.resolve(heapPath, 'Greek/lushing-01.md')
     let str = fse.readFileSync(heapPath).toString().trim()
     let rows = str.trim().split('\n')
     let cards = [], card
@@ -124,27 +136,3 @@ function readConf() {
     log('_ERR CONF')
   }
 }
-
-// inquirer
-//   .prompt([
-//     {
-//       type: 'list',
-//       name: 'size',
-//       message: 'What size do you need?',
-//       choices: ['Jumbo', 'Large', 'Standard', 'Medium', 'Small', 'Micro'],
-//       filter(val) {
-//         return val.toLowerCase();
-//       },
-//     },
-//   ])
-//   .then((answers) => {
-//     // Use user feedback for... whatever!!
-//     log(JSON.stringify(answers, null, '  '));
-//   })
-//   .catch((error) => {
-//     if (error.isTtyError) {
-//       console.log('_ERR TTY');
-//     } else {
-//       console.log('_ERR');
-//     }
-//   });
