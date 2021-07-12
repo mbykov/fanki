@@ -2,11 +2,12 @@ const log = console.log
 import { LowSync, JSONFileSync } from 'lowdb'
 import fse from 'fs-extra'
 import JSON5 from 'json5'
-import {fileURLToPath} from 'node:url';
+// import {fileURLToPath} from 'node:url';
 // import {resolve} from 'path'
 import os from 'os'
 // const readline = require('readline');
 import readline from 'readline'
+import chalk from 'chalk'
 
 let config = readConf()
 log('_CONF', config)
@@ -26,14 +27,18 @@ log('_CARDS_', cards.length)
 const homedir = os.homedir();
 log('_HOMEDIR_', homedir)
 
-
-
-
 // =========== HOME
 process.env['HOME']
 
 let card = {
-  current: 'a',
+  desc() {
+    let desc = this.current[this.step]
+    if (!desc) {
+      this.random()
+      desc = this.current[this.step]
+    }
+    return desc
+  },
 
   show() {
     let desc = this.current[this.step]
@@ -41,13 +46,13 @@ let card = {
       log('_RANDOM-CARD')
       this.random()
     } else {
-      log('_DESC:', desc)
+      log('_DESC:', chalk.green(desc))
     }
   },
 
-  nextStep() {
+  next() {
     this.step += 1
-    this.show()
+    // this.show()
   },
 
   prevStep() {
@@ -59,13 +64,24 @@ let card = {
     let idx = getRandomInt(cards.length)
     this.current = cards[idx]
     this.step = 0
-    this.show()
+    // this.show()
   }
 }
 
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-process.stdin.on('keypress', (str, key) => {
+const input = process.stdin
+
+const rl = readline.createInterface({
+  input: input,
+  output: process.stdout,
+})
+
+rl.prompt()
+rl.setPrompt(chalk.green(' • '))
+input.setEncoding('utf8')
+
+readline.emitKeypressEvents(input);
+input.setRawMode(true);
+input.on('keypress', (str, key) => {
   if (key.ctrl && key.name === 'c') {
     process.exit();
   } else {
@@ -74,25 +90,27 @@ process.stdin.on('keypress', (str, key) => {
     } else if (key.name == 'down') {
       console.log('_Down');
       card.random()
+
+    } else if (key.name == 'up' && key.shift) {
+      let desc = card.desc()
+      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(desc)
     } else if (key.name == 'up') {
-      console.log('_Up');
-      card.random()
+      card.next()
+      let desc = card.desc()
+      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(desc)
+      // card.random()
+
     } else if (key.name == 'left') {
       console.log('_Left');
       card.prevStep()
     } else if (key.name == 'right') {
       console.log('_Right');
-      card.nextStep()
+      card.next()
     }
   }
 });
-
-function showCard(step) {
-  let idx = getRandomInt(cards.length)
-  let card = cards[idx]
-  if (step) log('_CARD', card[1])
-  else log('_CARD', card[0])
-}
 
 card.random()
 console.log('Press any key...');
