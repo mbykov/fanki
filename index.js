@@ -51,7 +51,7 @@ let card = {
 
   show() {
     let desc = card.desc()
-    let more = (this.current.length -1 > this.step) ? ' ->' : ''
+    let more = (this.current.length -1 > this.step) ? ` ${chalk.grey('->')} ` : ''
     desc += more
     rl.write(null, { ctrl: true, name: 'u' })
     rl.write(desc)
@@ -106,6 +106,20 @@ input.on('keypress', (str, key) => {
     } else if (key.name == 'right') {
       card.next()
       card.show()
+    } else if (key.name == 'h') {
+      let help = `${chalk.bold('use arrows')}:
+${chalk.bold('down')}: new card
+${chalk.bold('right')}: next desc on the same card (if -> sign), or new card
+${chalk.bold('left')} - back along the card
+${chalk.bold('colors')} - from green to red (from raw to ripe)
+${chalk.bold('shift down')} - down to ripe, so do not show
+${chalk.bold('shift up')} - up to raw
+${chalk.bold('ctrl+l')} - clear screen
+${chalk.bold('ctrl+k')} - clear line
+`
+      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(null, { ctrl: true, name: 'k' })
+      rl.write(help)
     }
   }
 });
