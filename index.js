@@ -10,7 +10,7 @@ import readline from 'readline'
 import chalk from 'chalk'
 
 let config = readConf()
-log('_CONF', config)
+// log('_CONF', config)
 
 // heapPath = path.resolve(heapPath, 'Greek/lushing-01.md')
 
@@ -19,13 +19,13 @@ let filename = config.heap + '/Greek/lushing-01.md'
 // let heapPath_ = resolve(__dirname, config.heap)
 const heap = new URL(filename, import.meta.url);
 let heapPath = heap.pathname
-log('_heapPath', heapPath)
+// log('_heapPath', heapPath)
 
 let cards = getCards(heapPath)
-log('_CARDS_', cards.length)
+// log('_CARDS_', cards.length)
 
 const homedir = os.homedir();
-log('_HOMEDIR_', homedir)
+// log('_HOMEDIR_', homedir)
 
 // =========== HOME
 process.env['HOME']
@@ -40,31 +40,26 @@ let card = {
     return desc
   },
 
-  show() {
-    let desc = this.current[this.step]
-    if (!desc) {
-      log('_RANDOM-CARD')
-      this.random()
-    } else {
-      log('_DESC:', chalk.green(desc))
-    }
-  },
-
   next() {
     this.step += 1
-    // this.show()
   },
 
-  prevStep() {
+  prev() {
+    rl.write(null, { ctrl: true, name: 'u' })
     this.step -= 1
-    this.show()
+  },
+
+  show() {
+    let desc = card.desc()
+    rl.write(null, { ctrl: true, name: 'k' })
+    rl.write(desc)
   },
 
   random() {
+    rl.setPrompt(chalk.green(' • '))
     let idx = getRandomInt(cards.length)
     this.current = cards[idx]
     this.step = 0
-    // this.show()
   }
 }
 
@@ -86,28 +81,30 @@ input.on('keypress', (str, key) => {
     process.exit();
   } else {
     if (key.name == 'down' && key.shift) {
-      console.log('_Shift+Down');
+      // console.log('_Shift+Down');
+      rl.setPrompt(chalk.red(' • '))
+      card.show()
     } else if (key.name == 'down') {
-      console.log('_Down');
       card.random()
+      card.show()
 
     } else if (key.name == 'up' && key.shift) {
-      let desc = card.desc()
-      rl.write(null, { ctrl: true, name: 'u' })
-      rl.write(desc)
-    } else if (key.name == 'up') {
-      card.next()
-      let desc = card.desc()
-      rl.write(null, { ctrl: true, name: 'u' })
-      rl.write(desc)
-      // card.random()
+      rl.setPrompt(chalk.green(' • '))
+      card.show()
+    // } else if (key.name == 'up') {
+    //   card.next()
+    //   let desc = card.desc()
+    //   rl.write(null, { ctrl: true, name: 'u' })
+    //   rl.write(desc)
+    //   // card.random()
 
     } else if (key.name == 'left') {
-      console.log('_Left');
-      card.prevStep()
+      rl.write(null, { ctrl: true, name: 'k' })
+      card.prev()
+      card.show()
     } else if (key.name == 'right') {
-      console.log('_Right');
       card.next()
+      card.show()
     }
   }
 });
