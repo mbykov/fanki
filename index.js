@@ -37,7 +37,10 @@ function lookupHeap(srcdir) {
       fns = fns.filter(fn=> req.test(fn))
     })
 
-    if (fns.length > 1) log(chalk.red('_found too many possible files'))
+    if (fns.length > 1) {
+      log(chalk.red('_found too many possible files'))
+      log(fns)
+    }
     else if (fns.length == 0) log(chalk.red('_no possible file found'))
     else if (fns.length == 1) startFanki(fns[0])
   })
