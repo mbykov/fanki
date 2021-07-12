@@ -22,7 +22,7 @@ let heapPath = heap.pathname
 // log('_heapPath', heapPath)
 
 let cards = getCards(heapPath)
-// log('_CARDS_', cards.length)
+log('_CARDS_', cards.length)
 
 const homedir = os.homedir();
 // log('_HOMEDIR_', homedir)
@@ -51,7 +51,9 @@ let card = {
 
   show() {
     let desc = card.desc()
-    rl.write(null, { ctrl: true, name: 'k' })
+    let more = (this.current.length -1 > this.step) ? ' ->' : ''
+    desc += more
+    rl.write(null, { ctrl: true, name: 'u' })
     rl.write(desc)
   },
 
@@ -81,7 +83,6 @@ input.on('keypress', (str, key) => {
     process.exit();
   } else {
     if (key.name == 'down' && key.shift) {
-      // console.log('_Shift+Down');
       rl.setPrompt(chalk.red(' • '))
       card.show()
     } else if (key.name == 'down') {
