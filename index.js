@@ -8,6 +8,9 @@ import os from 'os'
 // const readline = require('readline');
 import readline from 'readline'
 import chalk from 'chalk'
+import glob from 'glob'
+
+let qs = process.argv.slice(2)
 
 let config = readConf()
 // log('_CONF', config)
@@ -21,93 +24,114 @@ const heap = new URL(filename, import.meta.url);
 let heapPath = heap.pathname
 // log('_heapPath', heapPath)
 
-let cards = getCards(heapPath)
-log('_CARDS_', cards.length)
+lookupHeap(config.heap)
+
+function lookupHeap(srcdir) {
+  let resrc = new RegExp('^' + srcdir + '/')
+  let pattern = [srcdir, '**/*'].join('/')
+
+  glob(pattern, function (er, fns) {
+    fns = fns.map(fn=> fn.replace(resrc, ''))
+    qs.forEach(query=> {
+      let req = new RegExp(query, 'i')
+      fns = fns.filter(fn=> req.test(fn))
+    })
+
+    if (fns.length > 1) log(chalk.red('_found too many possible files'))
+    else if (fns.length == 0) log(chalk.red('_no possible file found'))
+    else if (fns.length == 1) startFanki(fns[0])
+  })
+
+}
 
 const homedir = os.homedir();
 // log('_HOMEDIR_', homedir)
+// process.env['HOME']
 
-// =========== HOME
-process.env['HOME']
+function startFanki(fpath) {
+  fpath = '../heap/' + fpath
+  const file = new URL(fpath, import.meta.url);
+  let filePath = file.pathname
+  let cards = getCards(fpath)
+  log(cards.length, chalk.green('cards found, use arrows to start'))
+  const input = process.stdin
 
-let card = {
-  desc() {
-    let desc = this.current[this.step]
-    if (!desc) {
-      this.random()
-      desc = this.current[this.step]
-    }
-    return desc
-  },
+  const rl = readline.createInterface({
+    input: input,
+    output: process.stdout,
+  })
 
-  next() {
-    this.step += 1
-  },
+  let card = {
+    desc() {
+      let desc = this.current[this.step]
+      if (!desc) {
+        this.random()
+        desc = this.current[this.step]
+      }
+      return desc
+    },
 
-  prev() {
-    rl.write(null, { ctrl: true, name: 'u' })
-    this.step -= 1
-  },
+    next() {
+      this.step += 1
+    },
 
-  show() {
-    let desc = card.desc()
-    let more = (this.current.length -1 > this.step) ? ` ${chalk.grey('->')} ` : ''
-    desc += more
-    rl.write(null, { ctrl: true, name: 'u' })
-    rl.write(desc)
-  },
+    prev() {
+      rl.write(null, { ctrl: true, name: 'u' })
+      this.step -= 1
+    },
 
-  random() {
-    rl.setPrompt(chalk.green(' • '))
-    let idx = getRandomInt(cards.length)
-    this.current = cards[idx]
-    this.step = 0
-  }
-}
+    show() {
+      let desc = card.desc()
+      let more = (this.current.length -1 > this.step) ? ` ${chalk.grey('->')} ` : ''
+      desc += more
+      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(desc)
+    },
 
-const input = process.stdin
-
-const rl = readline.createInterface({
-  input: input,
-  output: process.stdout,
-})
-
-rl.prompt()
-rl.setPrompt(chalk.green(' • '))
-input.setEncoding('utf8')
-
-readline.emitKeypressEvents(input);
-input.setRawMode(true);
-input.on('keypress', (str, key) => {
-  if (key.ctrl && key.name === 'c') {
-    process.exit();
-  } else {
-    if (key.name == 'down' && key.shift) {
-      rl.setPrompt(chalk.red(' • '))
-      card.show()
-    } else if (key.name == 'down') {
-      card.random()
-      card.show()
-
-    } else if (key.name == 'up' && key.shift) {
+    random() {
       rl.setPrompt(chalk.green(' • '))
-      card.show()
-    // } else if (key.name == 'up') {
-    //   card.next()
-    //   let desc = card.desc()
-    //   rl.write(null, { ctrl: true, name: 'u' })
-    //   rl.write(desc)
-    //   // card.random()
+      let idx = getRandomInt(cards.length)
+      this.current = cards[idx]
+      this.step = 0
+    }
+  }
 
-    } else if (key.name == 'left') {
-      rl.write(null, { ctrl: true, name: 'k' })
-      card.prev()
-      card.show()
-    } else if (key.name == 'right') {
-      card.next()
-      card.show()
-    } else if (key.name == 'h') {
-      let help = `${chalk.bold('use arrows')}:
+  rl.prompt()
+  rl.setPrompt(chalk.green(' • '))
+  input.setEncoding('utf8')
+
+  readline.emitKeypressEvents(input);
+  input.setRawMode(true);
+  input.on('keypress', (str, key) => {
+    if (key.ctrl && key.name === 'c') {
+      process.exit();
+    } else {
+      if (key.name == 'down' && key.shift) {
+        rl.setPrompt(chalk.red(' • '))
+        card.show()
+      } else if (key.name == 'down') {
+        card.random()
+        card.show()
+
+      } else if (key.name == 'up' && key.shift) {
+        rl.setPrompt(chalk.green(' • '))
+        card.show()
+        // } else if (key.name == 'up') {
+        //   card.next()
+        //   let desc = card.desc()
+        //   rl.write(null, { ctrl: true, name: 'u' })
+        //   rl.write(desc)
+        //   // card.random()
+
+      } else if (key.name == 'left') {
+        rl.write(null, { ctrl: true, name: 'k' })
+        card.prev()
+        card.show()
+      } else if (key.name == 'right') {
+        card.next()
+        card.show()
+      } else if (key.name == 'h') {
+        let help = `${chalk.bold('use arrows')}:
 ${chalk.bold('down')}: new card
 ${chalk.bold('right')}: next desc on the same card (if -> sign), or new card
 ${chalk.bold('left')} - back along the card
@@ -117,15 +141,19 @@ ${chalk.bold('shift up')} - up to raw
 ${chalk.bold('ctrl+l')} - clear screen
 ${chalk.bold('ctrl+k')} - clear line
 `
-      rl.write(null, { ctrl: true, name: 'u' })
-      rl.write(null, { ctrl: true, name: 'k' })
-      rl.write(help)
+        rl.write(null, { ctrl: true, name: 'u' })
+        rl.write(null, { ctrl: true, name: 'k' })
+        rl.write(help)
+      }
     }
-  }
-});
+  });
 
-card.random()
-console.log('Press any key...');
+  card.random()
+  console.log('Press any key...');
+
+}
+
+
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
