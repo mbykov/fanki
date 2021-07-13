@@ -9,7 +9,7 @@ import os from 'os'
 import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
-import { dbInfo } from './lib/pouchdb.js'
+import { dbInfo, saveDocs, allDocs } from './lib/pouchdb.js'
 
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
@@ -20,19 +20,22 @@ init()
 async function init() {
   let config = readConf()
   config  = lookupHeap(config)
-  log('_C', config)
+  // log('_C', config)
   if (!config.dbn) return
-  let info = await dbInfo(config)
-  log('_INFO', info.doc_count);
+  let info = await dbInfo()
+  // log('_INFO', info);
   let docs
   if (!info.doc_count) {
     let str = getFile(config)
     if (!str) return
     docs = makeDocs(str)
-    log('_DOCS', docs);
+    // log('_DOCS', docs.slice(5,7));
+    await saveDocs(docs)
+  } else {
+    docs = await allDocs()
+    // log('_OLD_DOCS', docs.slice(0,2));
   }
-
-  // allDocs()
+  startFanki(docs)
 }
 
 function lookupHeap(config) {
@@ -61,18 +64,8 @@ function lookupHeap(config) {
   return config
 }
 
-function startFanki(config) {
-  // allDBs(config)
-  return
-
-  let fpath = config.restricted[0]
-  fpath = '../heap/' + fpath
-  const file = new URL(fpath, import.meta.url);
-  let filePath = file.pathname
-  let cards = getCards(fpath)
-
+function startFanki(cards) {
   log(cards.length, chalk.green('cards found, use arrows to start'))
-
   const input = process.stdin
 
   const rl = readline.createInterface({
@@ -82,10 +75,10 @@ function startFanki(config) {
 
   let card = {
     desc() {
-      let desc = this.current[this.step]
+      let desc = this.current.descs[this.step]
       if (!desc) {
         this.random()
-        desc = this.current[this.step]
+        desc = this.current.descs[this.step]
       }
       return desc
     },
@@ -101,7 +94,7 @@ function startFanki(config) {
 
     show() {
       let desc = card.desc()
-      let more = (this.current.length -1 > this.step) ? ` ${chalk.grey('->')} ` : ''
+      let more = (this.current.descs.length -1 > this.step) ? ` ${chalk.grey('->')} ` : ''
       desc += more
       rl.write(null, { ctrl: true, name: 'u' })
       rl.write(desc)
@@ -190,18 +183,17 @@ function getFile(config) {
 
 function makeDocs(str) {
   let rows = str.trim().split('\n')
-  log('R', rows.length)
   let cards = [], card, arr
   let comm = ''
   rows.forEach(row=> {
     card = {}
     if (!row) return
     let tmp = row.slice(0,2)
-    row = row.slice(2)
     if (tmp == '# ') {
       comm = ''
       return
     } else if (tmp == '##') {
+      row = row.slice(2)
       comm = row
     }  else {
       card.descs = row.trim().split(' = ')
