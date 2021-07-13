@@ -9,7 +9,7 @@ import os from 'os'
 import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
-import { dbInfo, saveDocs, allDocs } from './lib/pouchdb.js'
+import { getUnitDocs, saveUnitDocs, dbInfo, docsInfo, allDocs } from './lib/pouchdb.js'
 
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
@@ -20,22 +20,28 @@ init()
 async function init() {
   let config = readConf()
   config  = lookupHeap(config)
-  // log('_C', config)
   if (!config.dbn) return
-  let info = await dbInfo()
-  // log('_INFO', info);
+
+  let unitdocs = await getUnitDocs(config.dbn)
+  log('_U-DOCS', unitdocs.slice(5,7));
+  log('_U-DOCS', unitdocs.length);
+  // let info = await dbInfo()
+  // log('_dbINFO', info);
   let docs
-  if (!info.doc_count) {
+  if (!unitdocs.length) {
     let str = getFile(config)
     if (!str) return
-    docs = makeDocs(str)
-    // log('_DOCS', docs.slice(5,7));
-    await saveDocs(docs)
+    docs = parseDocs(str)
+    log('_DOCS', docs.slice(5,7));
+    log('_DOCS', docs.length);
+
+    await saveUnitDocs(config.dbn, docs)
+    // await saveDocs(docs)
   } else {
-    docs = await allDocs()
+    // docs = await allDocs()
     // log('_OLD_DOCS', docs.slice(0,2));
   }
-  startFanki(docs)
+  // startFanki(docs)
 }
 
 function lookupHeap(config) {
@@ -58,9 +64,8 @@ function lookupHeap(config) {
   else if (restricted.length == 0) log(chalk.red('_no possible file found'))
   else if (restricted.length == 1) {
     config.dbn = restricted[0]
-    // allDBs(config)
-    // startFanki(config)
   }
+  // log('_C', config)
   return config
 }
 
@@ -181,7 +186,7 @@ function getFile(config) {
   }
 }
 
-function makeDocs(str) {
+function parseDocs(str) {
   let rows = str.trim().split('\n')
   let cards = [], card, arr
   let comm = ''
