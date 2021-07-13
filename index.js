@@ -9,7 +9,7 @@ import os from 'os'
 import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
-import { getUnitDocs, saveUnitDocs, dbInfo, docsInfo, allDocs } from './lib/pouchdb.js'
+import { getUnitDocs, saveUnitDocs } from './lib/pouchdb.js'
 
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
@@ -21,10 +21,11 @@ async function init() {
   let config = readConf()
   config  = lookupHeap(config)
   if (!config.dbn) return
+  log('_DBN', config.dbn);
 
   let unitdocs = await getUnitDocs(config.dbn)
-  log('_U-DOCS', unitdocs.slice(5,7));
-  log('_U-DOCS', unitdocs.length);
+  // log('_U-DOCS', unitdocs.slice(5,7));
+  // log('_U-DOCS', unitdocs.length);
   // let info = await dbInfo()
   // log('_dbINFO', info);
   let docs
@@ -32,16 +33,17 @@ async function init() {
     let str = getFile(config)
     if (!str) return
     docs = parseDocs(str)
-    log('_DOCS', docs.slice(5,7));
-    log('_DOCS', docs.length);
+    // log('_DOCS', docs.slice(5,7));
+    // log('_DOCS', docs.length);
 
     await saveUnitDocs(config.dbn, docs)
+    unitdocs = docs
     // await saveDocs(docs)
-  } else {
+  // } else {
     // docs = await allDocs()
     // log('_OLD_DOCS', docs.slice(0,2));
   }
-  // startFanki(docs)
+  startFanki(unitdocs)
 }
 
 function lookupHeap(config) {
