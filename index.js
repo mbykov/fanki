@@ -9,54 +9,70 @@ import os from 'os'
 import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
+import { dbInfo } from './lib/pouchdb.js'
 
 let qs = process.argv.slice(2)
+const homedir = os.homedir();
+// log('_HOMEDIR_', homedir)
 
-let config = readConf()
-// log('_CONF', config)
+init()
 
-// heapPath = path.resolve(heapPath, 'Greek/lushing-01.md')
+async function init() {
+  let config = readConf()
+  config  = lookupHeap(config)
+  log('_C', config)
+  if (!config.dbn) return
+  let info = await dbInfo(config)
+  log('_INFO', info.doc_count);
+  let docs
+  if (!info.doc_count) {
+    let str = getFile(config)
+    if (!str) return
+    docs = makeDocs(str)
+    log('_DOCS', docs);
+  }
 
-let filename = config.heap + '/Greek/lushing-01.md'
+  // allDocs()
+}
 
-// let heapPath_ = resolve(__dirname, config.heap)
-const heap = new URL(filename, import.meta.url);
-let heapPath = heap.pathname
-// log('_heapPath', heapPath)
-
-lookupHeap(config.heap)
-
-function lookupHeap(srcdir) {
+function lookupHeap(config) {
+  let srcdir = config.heap
   let resrc = new RegExp('^' + srcdir + '/')
   let pattern = [srcdir, '**/*'].join('/')
 
-  glob(pattern, function (er, fns) {
-    fns = fns.map(fn=> fn.replace(resrc, ''))
-    qs.forEach(query=> {
-      let req = new RegExp(query, 'i')
-      fns = fns.filter(fn=> req.test(fn))
+  let fns = glob.sync(pattern)
+  config.fns = fns.length
+  let restricted = fns.map(fn=> fn.replace(resrc, ''))
+  qs.forEach(query=> {
+    let req = new RegExp(query, 'i')
+    restricted = restricted.filter(fn=> req.test(fn))
     })
 
-    if (fns.length > 1) {
-      log(chalk.red('_found too many possible files'))
-      log(fns)
-    }
-    else if (fns.length == 0) log(chalk.red('_no possible file found'))
-    else if (fns.length == 1) startFanki(fns[0])
-  })
-
+  if (restricted.length > 1) {
+    log(chalk.red('_found too many possible files'))
+    log(restricted)
+  }
+  else if (restricted.length == 0) log(chalk.red('_no possible file found'))
+  else if (restricted.length == 1) {
+    config.dbn = restricted[0]
+    // allDBs(config)
+    // startFanki(config)
+  }
+  return config
 }
 
-const homedir = os.homedir();
-// log('_HOMEDIR_', homedir)
-// process.env['HOME']
+function startFanki(config) {
+  // allDBs(config)
+  return
 
-function startFanki(fpath) {
+  let fpath = config.restricted[0]
   fpath = '../heap/' + fpath
   const file = new URL(fpath, import.meta.url);
   let filePath = file.pathname
   let cards = getCards(fpath)
+
   log(cards.length, chalk.green('cards found, use arrows to start'))
+
   const input = process.stdin
 
   const rl = readline.createInterface({
@@ -156,36 +172,44 @@ ${chalk.bold('ctrl+k')} - clear line
 
 }
 
-
-
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-function getCards(heapPath) {
+function getFile(config) {
+  let fpath = config.dbn
+  fpath = '../heap/' + fpath
+  const file = new URL(fpath, import.meta.url);
+  let filePath = file.pathname
   try {
-    let str = fse.readFileSync(heapPath).toString().trim()
-    let rows = str.trim().split('\n')
-    let cards = [], card
-    let comm = ''
-    rows.forEach(row=> {
-      if (!row) return
-      let tmp = row.slice(0,2)
-      if (tmp == '# ') {
-        comm = ''
-        return
-      } else if (tmp == '##') {
-        comm = row
-      }  else {
-        card = row.trim().split(' = ')
-        if (comm) card.push(comm)
-      }
-      cards.push(card)
-    })
-    return cards
+    return fse.readFileSync(filePath).toString().trim()
   } catch (err) {
     log('_ERR CARDS')
   }
+}
+
+function makeDocs(str) {
+  let rows = str.trim().split('\n')
+  log('R', rows.length)
+  let cards = [], card, arr
+  let comm = ''
+  rows.forEach(row=> {
+    card = {}
+    if (!row) return
+    let tmp = row.slice(0,2)
+    row = row.slice(2)
+    if (tmp == '# ') {
+      comm = ''
+      return
+    } else if (tmp == '##') {
+      comm = row
+    }  else {
+      card.descs = row.trim().split(' = ')
+      if (comm) card.descs.push(comm)
+    }
+    if (card.descs) cards.push(card)
+  })
+  return cards
 }
 
 function readConf() {
