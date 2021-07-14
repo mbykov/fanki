@@ -81,6 +81,11 @@ function startFanki(cards) {
   })
 
   let card = {
+    log(str, key) {
+      log('_STR', str)
+      log('_KEY', key)
+    },
+
     desc() {
       let desc = this.current.descs[this.step]
       if (!desc) {
@@ -119,6 +124,7 @@ function startFanki(cards) {
   rl.setPrompt(chalk.green(' • '))
   input.setEncoding('utf8')
 
+
   readline.emitKeypressEvents(input);
   input.setRawMode(true);
   input.on('keypress', (str, key) => {
@@ -131,16 +137,15 @@ function startFanki(cards) {
       } else if (key.name == 'down') {
         card.random()
         card.show()
-
       } else if (key.name == 'up' && key.shift) {
         rl.setPrompt(chalk.green(' • '))
         card.show()
-        // } else if (key.name == 'up') {
-        //   card.next()
-        //   let desc = card.desc()
-        //   rl.write(null, { ctrl: true, name: 'u' })
-        //   rl.write(desc)
-        //   // card.random()
+
+      } else if (key.name == 'd') {
+        card.log(str, key)
+
+      } else if (key.name == 'left' && key.shift) {
+      } else if (key.name == 'right' && key.shift) {
 
       } else if (key.name == 'left') {
         rl.write(null, { ctrl: true, name: 'k' })
