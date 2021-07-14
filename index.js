@@ -82,8 +82,14 @@ function startFanki(cards) {
 
   let card = {
     log(str, key) {
-      log('_STR', str)
-      log('_KEY', key)
+      rl.question('What do you think of Node.js? ', (answer) => {
+        // TODO: Log the answer in a database
+        console.log(`Thank you for your valuable feedback: ${answer}`);
+        rl.close();
+      });
+
+      // log('_STR', str)
+      // log('_KEY', key)
     },
 
     desc() {
@@ -106,9 +112,24 @@ function startFanki(cards) {
 
     show() {
       let desc = card.desc()
-      let more = (this.current.descs.length -1 > this.step) ? ` ${chalk.grey('->')} ` : ''
+      let more = (this.current.descs.length -1 > this.step) ? '->' : ''
       desc += more
       rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(desc)
+    },
+
+    q() {
+      let pos = rl.cursor
+      let desc = this.current.descs[this.step]
+      rl.write(null, { ctrl: true, name: 'k' })
+      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(null)
+      log('_1')
+      log(pos)
+      log('_2')
+      rl.write(null, { ctrl: true, name: 'k' })
+      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(null)
       rl.write(desc)
     },
 
@@ -127,7 +148,9 @@ function startFanki(cards) {
 
   readline.emitKeypressEvents(input);
   input.setRawMode(true);
+
   input.on('keypress', (str, key) => {
+    // log('_KKYE', key);
     if (key.ctrl && key.name === 'c') {
       process.exit();
     } else {
@@ -141,8 +164,10 @@ function startFanki(cards) {
         rl.setPrompt(chalk.green(' • '))
         card.show()
 
+      } else if (key.name == 'return') {
+        // card.q()
       } else if (key.name == 'd') {
-        card.log(str, key)
+        card.q()
 
       } else if (key.name == 'left' && key.shift) {
       } else if (key.name == 'right' && key.shift) {
