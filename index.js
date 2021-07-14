@@ -96,7 +96,8 @@ function startFanki(unitname, cards) {
       // log('_2', wf)
       let dict = await searchDict(unitname, wf)
       if (dict && dict.rdict) {
-        let answer = [dict.article, dict.trns].join(': ')
+        let article = dict.article || dict.rdict
+        let answer = [article, dict.trns].join(': ')
         log(chalk.green('dict: '), answer)
       } else {
         log(chalk.red('dict: no result:'), wf)
