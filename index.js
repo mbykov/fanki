@@ -9,7 +9,7 @@ import os from 'os'
 import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
-import { getUnitDocs, saveUnitDocs } from './lib/pouchdb.js'
+import { getUnitDocs, saveUnitDocs, getUnitDicts, saveUnitDicts, searchDict } from './lib/pouchdb.js'
 
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
@@ -21,57 +21,34 @@ async function init() {
   let config = readConf()
   config  = lookupHeap(config)
   if (!config.dbn) return
-  log('_DBN', config.dbn);
+  let unitname = config.dbn
+  log('_UNAME', unitname);
 
   let unitdocs = await getUnitDocs(config.dbn)
-  // log('_U-DOCS', unitdocs.slice(5,7));
-  // log('_U-DOCS', unitdocs.length);
-  // let info = await dbInfo()
-  // log('_dbINFO', info);
-  let docs
   if (!unitdocs.length) {
     let str = getFile(config)
     if (!str) return
-    docs = parseDocs(str)
-    // log('_DOCS', docs.slice(5,7));
-    // log('_DOCS', docs.length);
-
+    let docs = parseDocs(str)
     await saveUnitDocs(config.dbn, docs)
     unitdocs = docs
-    // await saveDocs(docs)
-  // } else {
-    // docs = await allDocs()
-    // log('_OLD_DOCS', docs.slice(0,2));
   }
-  startFanki(unitdocs)
+
+  let unitdicts = await getUnitDicts(config.dbn)
+  if (!unitdicts.length) {
+    log('_SAVE DICT_')
+    let dictstr = getDictFile()
+    let dicts = parseDicts(dictstr)
+    await saveUnitDicts(config.dbn, dicts)
+    unitdicts = dicts
+  }
+
+  let tmpdicts = unitdicts.slice(10,13)
+  log('_DICTS', tmpdicts)
+
+  startFanki(unitname, unitdocs)
 }
 
-function lookupHeap(config) {
-  let srcdir = config.heap
-  let resrc = new RegExp('^' + srcdir + '/')
-  let pattern = [srcdir, '**/*'].join('/')
-
-  let fns = glob.sync(pattern)
-  config.fns = fns.length
-  let restricted = fns.map(fn=> fn.replace(resrc, ''))
-  qs.forEach(query=> {
-    let req = new RegExp(query, 'i')
-    restricted = restricted.filter(fn=> req.test(fn))
-    })
-
-  if (restricted.length > 1) {
-    log(chalk.red('_found too many possible files'))
-    log(restricted)
-  }
-  else if (restricted.length == 0) log(chalk.red('_no possible file found'))
-  else if (restricted.length == 1) {
-    config.dbn = restricted[0]
-  }
-  // log('_C', config)
-  return config
-}
-
-function startFanki(cards) {
+function startFanki(unitname, cards) {
   log(cards.length, chalk.green('cards found, use arrows to start'))
   const input = process.stdin
 
@@ -115,8 +92,8 @@ function startFanki(cards) {
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
       log('_1')
-      log('_2', pos)
       log('_2', wf)
+      let dict = searchDict(unitname, wf)
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
       this.show()
@@ -190,6 +167,31 @@ ${chalk.bold('ctrl+k')} - clear line
 
 }
 
+function lookupHeap(config) {
+  let srcdir = config.heap
+  let resrc = new RegExp('^' + srcdir + '/')
+  let pattern = [srcdir, '**/*'].join('/')
+
+  let fns = glob.sync(pattern)
+  config.fns = fns.length
+  let restricted = fns.map(fn=> fn.replace(resrc, ''))
+  qs.forEach(query=> {
+    let req = new RegExp(query, 'i')
+    restricted = restricted.filter(fn=> req.test(fn))
+  })
+
+  if (restricted.length > 1) {
+    log(chalk.red('_found too many possible files'))
+    log(restricted)
+  }
+  else if (restricted.length == 0) log(chalk.red('_no possible file found'))
+  else if (restricted.length == 1) {
+    config.dbn = restricted[0]
+  }
+  // log('_C', config)
+  return config
+}
+
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
@@ -204,6 +206,20 @@ function getFile(config) {
   } catch (err) {
     log('_ERR CARDS')
   }
+  return ''
+}
+
+function getDictFile() {
+  let fpath = '../heap/grc/attic-dict.md'
+  const file = new URL(fpath, import.meta.url);
+  let filePath = file.pathname
+  log('_DP', filePath)
+  try {
+    return fse.readFileSync(filePath).toString().trim()
+  } catch (err) {
+    log('_ERR CARDS')
+  }
+  return ''
 }
 
 function parseDocs(str) {
@@ -227,6 +243,21 @@ function parseDocs(str) {
     if (card.descs) cards.push(card)
   })
   return cards
+}
+
+function parseDicts(str) {
+  let rows = str.trim().split('\n')
+  let dicts = [], dict, arr, rdict
+  rows.forEach(row=> {
+    if (!row) return
+    dict = {}
+    let arr = row.trim().split(' = ')
+    rdict = arr[0].split('(')[0].trim()
+    dict.rdict = rdict
+    dict.trns = arr.slice(1).join('; ')
+    dicts.push(dict)
+  })
+  return dicts
 }
 
 function readConf() {
