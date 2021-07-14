@@ -10,6 +10,7 @@ import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
 import { getUnitDocs, saveUnitDocs, getUnitDicts, saveUnitDicts, searchDict } from './lib/pouchdb.js'
+import {oxia, comb, plain, strip} from 'orthos'
 
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
@@ -94,11 +95,11 @@ function startFanki(unitname, cards) {
       // log('_1')
       // log('_2', wf)
       let dict = await searchDict(unitname, wf)
-      if (dict.rdict) {
+      if (dict && dict.rdict) {
         let answer = [dict.article, dict.trns].join(': ')
         log(chalk.green('dict: '), answer)
       } else {
-        log('_4 no result')
+        log(chalk.red('dict: no result:'), wf)
       }
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
@@ -261,7 +262,9 @@ function parseDicts(str) {
     article = arr[0].split('(')[0].trim()
     let rdict = article.split(/,| or/)[0]
     dict.rdict = rdict
-    dict.article = article
+    dict.dict = comb(rdict)
+    // dict.dict = oxia(comb(rdict))
+    dict.article = (article == rdict) ? '' : article
     dict.trns = arr.slice(1).join('; ')
     dicts.push(dict)
   })
