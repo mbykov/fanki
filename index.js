@@ -85,15 +85,21 @@ function startFanki(unitname, cards) {
       rl.write(desc)
     },
 
-    dict() {
+    async dict() {
       let pos = rl.cursor
       let desc = card.desc()
       let wf = getWordAt(desc, pos)
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
-      log('_1')
-      log('_2', wf)
-      let dict = searchDict(unitname, wf)
+      // log('_1')
+      // log('_2', wf)
+      let dict = await searchDict(unitname, wf)
+      if (dict.rdict) {
+        let answer = [dict.article, dict.trns].join(': ')
+        log(chalk.green('dict: '), answer)
+      } else {
+        log('_4 no result')
+      }
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
       this.show()
@@ -247,13 +253,15 @@ function parseDocs(str) {
 
 function parseDicts(str) {
   let rows = str.trim().split('\n')
-  let dicts = [], dict, arr, rdict
+  let dicts = [], dict, arr, rdict, article
   rows.forEach(row=> {
     if (!row) return
     dict = {}
     let arr = row.trim().split(' = ')
-    rdict = arr[0].split('(')[0].trim()
+    article = arr[0].split('(')[0].trim()
+    let rdict = article.split(/,| or/)[0]
     dict.rdict = rdict
+    dict.article = article
     dict.trns = arr.slice(1).join('; ')
     dicts.push(dict)
   })
