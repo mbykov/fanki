@@ -81,17 +81,6 @@ function startFanki(cards) {
   })
 
   let card = {
-    log(str, key) {
-      rl.question('What do you think of Node.js? ', (answer) => {
-        // TODO: Log the answer in a database
-        console.log(`Thank you for your valuable feedback: ${answer}`);
-        rl.close();
-      });
-
-      // log('_STR', str)
-      // log('_KEY', key)
-    },
-
     desc() {
       let desc = this.current.descs[this.step]
       if (!desc) {
@@ -114,23 +103,23 @@ function startFanki(cards) {
       let desc = card.desc()
       let more = (this.current.descs.length -1 > this.step) ? '->' : ''
       desc += more
-      rl.write(null, { ctrl: true, name: 'u' })
+      rl.write(null, { ctrl: true, name: 'a' })
+      rl.write(null, { ctrl: true, name: 'k' })
       rl.write(desc)
     },
 
-    q() {
+    dict() {
       let pos = rl.cursor
-      let desc = this.current.descs[this.step]
+      let desc = card.desc()
+      let wf = getWordAt(desc, pos)
+      rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
-      rl.write(null, { ctrl: true, name: 'u' })
-      rl.write(null)
       log('_1')
-      log(pos)
-      log('_2')
+      log('_2', pos)
+      log('_2', wf)
+      rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
-      rl.write(null, { ctrl: true, name: 'u' })
-      rl.write(null)
-      rl.write(desc)
+      this.show()
     },
 
     random() {
@@ -164,11 +153,10 @@ function startFanki(cards) {
         rl.setPrompt(chalk.green(' • '))
         card.show()
 
-      } else if (key.name == 'return') {
+      // } else if (key.name == 'return') {
         // card.q()
       } else if (key.name == 'd') {
-        card.q()
-
+        card.dict()
       } else if (key.name == 'left' && key.shift) {
       } else if (key.name == 'right' && key.shift) {
 
@@ -249,4 +237,22 @@ function readConf() {
   } catch (err) {
     log('_ERR CONF')
   }
+}
+
+// https://stackoverflow.com/questions/5173316/finding-the-word-at-a-position-in-javascript
+function getWordAt (str, pos) {
+  str = String(str);
+  pos = Number(pos) >>> 0;
+
+  // Search for the word's beginning and end.
+  var left = str.slice(0, pos + 1).search(/\S+$/),
+  // var left = str.slice(0, pos + 1).search(/\S+\s*/),
+      right = str.slice(pos).search(/\s/);
+
+  // The last word in the string is a special case.
+  if (right < 0) {
+    return str.slice(left);
+  }
+
+  return str.slice(left, right + pos);
 }
