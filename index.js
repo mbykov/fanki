@@ -2,19 +2,17 @@ const log = console.log
 import { LowSync, JSONFileSync } from 'lowdb'
 import fse from 'fs-extra'
 import JSON5 from 'json5'
-// import {fileURLToPath} from 'node:url';
-// import {resolve} from 'path'
 import os from 'os'
-// const readline = require('readline');
 import readline from 'readline'
 import chalk from 'chalk'
 import glob from 'glob'
 import { getUnitDocs, saveUnitDocs, getUnitDicts, saveUnitDicts, searchDict } from './lib/pouchdb.js'
 import {oxia, comb, plain, strip} from 'orthos'
 
+import clipboardy from 'clipboardy'
+
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
-// log('_HOMEDIR_', homedir)
 
 init()
 
@@ -23,7 +21,6 @@ async function init() {
   config  = lookupHeap(config)
   if (!config.dbn) return
   let unitname = config.dbn
-  log('_UNAME', unitname);
 
   let unitdocs = await getUnitDocs(config.dbn)
   if (!unitdocs.length) {
@@ -36,15 +33,11 @@ async function init() {
 
   let unitdicts = await getUnitDicts(config.dbn)
   if (!unitdicts.length) {
-    log('_SAVE DICT_')
     let dictstr = getDictFile()
     let dicts = parseDicts(dictstr)
     await saveUnitDicts(config.dbn, dicts)
     unitdicts = dicts
   }
-
-  let tmpdicts = unitdicts.slice(10,13)
-  log('_DICTS', tmpdicts)
 
   startFanki(unitname, unitdocs)
 }
@@ -57,6 +50,8 @@ function startFanki(unitname, cards) {
     input: input,
     output: process.stdout,
   })
+
+  rl.write(null, { ctrl: true, name: 'l' })
 
   let card = {
     desc() {
@@ -92,8 +87,6 @@ function startFanki(unitname, cards) {
       let wf = getWordAt(desc, pos)
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
-      // log('_1')
-      // log('_2', wf)
       let dict = await searchDict(unitname, wf)
       if (dict && dict.rdict) {
         let article = dict.article || dict.rdict
@@ -105,6 +98,14 @@ function startFanki(unitname, cards) {
       rl.write(null, { ctrl: true, name: 'a' })
       rl.write(null, { ctrl: true, name: 'k' })
       this.show()
+    },
+
+    ctrlV() {
+      rl.write(null, { ctrl: true, name: 'a' })
+      rl.write(null, { ctrl: true, name: 'k' })
+      let clip = clipboardy.readSync()
+      this.current = {descs: [clip, '']}
+      rl.write(clip)
     },
 
     random() {
@@ -124,7 +125,6 @@ function startFanki(unitname, cards) {
   input.setRawMode(true);
 
   input.on('keypress', (str, key) => {
-    // log('_KKYE', key);
     if (key.ctrl && key.name === 'c') {
       process.exit();
     } else {
@@ -138,8 +138,9 @@ function startFanki(unitname, cards) {
         rl.setPrompt(chalk.green(' • '))
         card.show()
 
-      // } else if (key.name == 'return') {
-        // card.q()
+      } else if (key.name == 'v') {
+        card.ctrlV()
+
       } else if (key.name == 'd') {
         card.dict()
       } else if (key.name == 'left' && key.shift) {
@@ -190,13 +191,12 @@ function lookupHeap(config) {
 
   if (restricted.length > 1) {
     log(chalk.red('_found too many possible files'))
-    log(restricted)
+    console.log(restricted)
   }
   else if (restricted.length == 0) log(chalk.red('_no possible file found'))
   else if (restricted.length == 1) {
     config.dbn = restricted[0]
   }
-  // log('_C', config)
   return config
 }
 
@@ -221,7 +221,6 @@ function getDictFile() {
   let fpath = '../heap/grc/attic-dict.md'
   const file = new URL(fpath, import.meta.url);
   let filePath = file.pathname
-  log('_DP', filePath)
   try {
     return fse.readFileSync(filePath).toString().trim()
   } catch (err) {
