@@ -1,6 +1,6 @@
 {
-  "name": "sanki",
-  "version": "1.0.0",
+  "name": "fanki",
+  "version": "0.4.1",
   "description": "",
   "main_": "index.js",
   "exports": "./index.js",

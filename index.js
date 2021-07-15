@@ -13,6 +13,7 @@ import clipboardy from 'clipboardy'
 
 let qs = process.argv.slice(2)
 const homedir = os.homedir();
+const circle = ' ⬤ '  // •
 
 init()
 
@@ -60,6 +61,7 @@ function startFanki(unitname, cards) {
         this.random()
         desc = this.current.descs[this.step]
       }
+      desc = desc.replace(/\.$/, '')
       return desc
     },
 
@@ -109,7 +111,7 @@ function startFanki(unitname, cards) {
     },
 
     random() {
-      rl.setPrompt(chalk.green(' • '))
+      rl.setPrompt(chalk.green(circle))
       let idx = getRandomInt(cards.length)
       this.current = cards[idx]
       this.step = 0
@@ -117,7 +119,7 @@ function startFanki(unitname, cards) {
   }
 
   rl.prompt()
-  rl.setPrompt(chalk.green(' • '))
+  rl.setPrompt(chalk.green(circle))
   input.setEncoding('utf8')
 
 
@@ -129,13 +131,13 @@ function startFanki(unitname, cards) {
       process.exit();
     } else {
       if (key.name == 'down' && key.shift) {
-        rl.setPrompt(chalk.red(' • '))
+        rl.setPrompt(chalk.red(circle))
         card.show()
       } else if (key.name == 'down') {
         card.random()
         card.show()
       } else if (key.name == 'up' && key.shift) {
-        rl.setPrompt(chalk.green(' • '))
+        rl.setPrompt(chalk.green(circle))
         card.show()
 
       } else if (key.name == 'v') {
@@ -237,12 +239,18 @@ function parseDocs(str) {
     card = {}
     if (!row) return
     let tmp = row.slice(0,2)
-    if (tmp == '# ') {
+    if (row.slice(0,2) == '# ') {
       comm = ''
       return
-    } else if (tmp == '##') {
-      row = row.slice(2)
+    } else if (row.slice(0,3) == '## ') {
+      comm = ''
+      return
+    } else if (row.slice(0,4) == '### ') {
+      row = row.slice(0,4)
       comm = row
+    } else if (row.slice(0,3) == '###' || row.slice(0,2) == '##' || row.slice(0,1) == '#') {
+      comm = ''
+      return
     }  else {
       card.descs = row.trim().split(' = ')
       if (comm) card.descs.push(comm)
