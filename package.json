@@ -8,7 +8,7 @@
     "start": "node index.js"
   },
   "author": "M.Bykov <m.bykov@gmail.com>",
- "homepage": "http://diglossa.org",
+  "homepage": "http://diglossa.org",
    "license": "GPL-3.0",
   "type": "module",
     "dependencies": {
