@@ -47,7 +47,7 @@ more info at http://diglossa.org
 `)
       .argv
 
-log('_A', argv)
+// log('_A', argv)
 
 start()
 
@@ -71,16 +71,11 @@ async function start() {
     if (res.files) log(res.files)
     return
   }
-  conf.dbn = res.fn
-  log('___FN', conf)
-
+  heappath = heappath.replace(/^~/, '')
+  conf.heap = res.fn.split(heappath)[0] + heappath
+  conf.unit = res.fn
+  // log('___FN', conf)
   fanki(conf)
-
-  // let book = await getFileByExt(res.fn)
-  // if (!book) return log(chalk.red('can not parse file'))
-
-  // if (argv.md || argv.json) saveBook(book, conf, argv)
-  // else bookInfo(book)
 }
 
 function checkConfig(argv) {
@@ -91,15 +86,15 @@ function checkConfig(argv) {
   let str, conf = null
   try {
     str = fse.readFileSync(cpath).toString()
+    conf = JSON5.parse(str)
   } catch(err) {
     try {
       cpath = path.resolve(homedir, confname)
       str = fse.readFileSync(cpath).toString()
+      conf = JSON5.parse(str)
     } catch(err) {
       console.log('_ERR no config')
     }
   }
-  if (str) conf = JSON5.parse(str)
-  log('_conf', cpath, conf)
   return conf
 }
