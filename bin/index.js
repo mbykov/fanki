@@ -71,9 +71,11 @@ async function start() {
     if (res.files) log(res.files)
     return
   }
-  log('___FN', res.fn)
+  conf.dbn = res.fn
+  log('___FN', conf)
 
   fanki(conf)
+
   // let book = await getFileByExt(res.fn)
   // if (!book) return log(chalk.red('can not parse file'))
 
