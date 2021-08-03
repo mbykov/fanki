@@ -13,28 +13,15 @@ import JSON5 from 'json5'
 const log = console.log
 
 const argv = yargs(hideBin(process.argv))
+      // .usage('Usage: $0 substrs to choose unit in heap [options]')
       .options({
-        'md': {
-          describe: 'convert to .markdown',
-        },
-        'json': {
-          describe: 'convert to .json'
-        },
-        'w/o type': {
-          describe: 'show book info'
-        },
-        'conf': {
-          alias: 'c',
-          describe: 'path to config file'
+        'info': {
+          describe: 'show unit info'
         },
         'input': {
           alias: 'i',
-          describe: 'path to heap'
+          describe: 'path to fanki-heap'
         },
-        'output': {
-          alias: 'o',
-          describe: 'path to result, or current directory'
-        }
       })
       .command('substr... etc', 'lookup in a books heap by substrs', () => {}, (argv) => {
         console.info(argv)
@@ -47,23 +34,26 @@ more info at http://diglossa.org
 `)
       .argv
 
-// log('_A', argv)
+// log('_ARGV', argv)
 
 start()
 
 async function start() {
   let args = argv._
-  if (!args.length) return // todo: д.б. help
+  // if (!args.length) return // todo: д.б. help
   let conf = checkConfig(argv)
   log('_conf', conf, (conf))
   let heappath
   if (argv.i) heappath = path.resolve(process.cwd(), argv.i)
-  else if (!heappath && conf) heappath = conf.input
+  else if (conf) heappath = conf.input
   else {
     log(chalk.red('where is your heap?'))
     return
   }
   log('_hp', heappath)
+  if (argv.info) {
+    log('_INFO', heappath)
+  }
 
   let res = lookupheap(heappath, args)
   if (!res.fn) {
@@ -71,10 +61,12 @@ async function start() {
     if (res.files) log(res.files)
     return
   }
+  log('_HP', heappath)
+  if (!conf) conf = {}
   heappath = heappath.replace(/^~/, '')
   conf.heap = res.fn.split(heappath)[0] + heappath
   conf.unit = res.fn
-  // log('___FN', conf)
+  log('___CONF', conf)
   fanki(conf)
 }
 
