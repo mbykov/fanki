@@ -102,4 +102,4 @@ The program does not know anything about the test language, and only works with 
 
 Therefore, no language parsers or analysers are used in dictionary searches. Only unchangeable and specially defined forms in the dictionary will be found.
 
-Analyzers will be used in the older version of Fanki
+Analyzers will be used in the future more mature version of Fanki for desktop
