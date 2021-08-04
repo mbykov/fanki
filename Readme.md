@@ -14,7 +14,7 @@ absolutely easily, in a minute, you can create a unit of Anki-like tests and dic
 ```
 $ sudo npm install fanki --global
 ```
-clone or create some fanki-heap
+clone or create some fanki-heap, example: https://github.com/mbykov/fanki-heap
 
 ```
 $ git clone https://github.com/mbykov/fanki-heap
