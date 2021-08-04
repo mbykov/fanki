@@ -57,7 +57,7 @@ $ fanki lush 02 -i ~/fanki-heap
 
 **shift left / right** - move along a line to press \'d\', \'s\' or  \'v\'
 
-## controls:
+## controls
 
 d - wordform dictionary search
 
@@ -81,7 +81,7 @@ yellow - show less often
 
 red - ripe, do not show, eat
 
-## dictionaries:
+## dictionaries
 
 dictionaries have the same format of rows
 
@@ -93,3 +93,9 @@ dictionaries have the same format of rows
 but dictionaries should have "-dict" in a file name
 
 the closer to the file with the unit of tests, the earlier the dictionary is processed. Dictionaries at the heap root are processed last. Therefore, duplicate values in later (upper) dictionaries will not be counted.
+
+## note
+
+although you can see the names of the languages in the funky heap example, the application does not use this in any way. These names are for my convenience only, to group test units.
+
+The program does not know anything about the test language, and only works with strings. Therefore, it is possible to request information about the "c" symbol for the European language, but there will be no result, however.
