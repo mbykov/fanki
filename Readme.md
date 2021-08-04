@@ -96,6 +96,10 @@ the closer to the file with the unit of tests, the earlier the dictionary is pro
 
 ## note
 
-although you can see the names of the languages in the funky heap example, the application does not use this in any way. These names are for my convenience only, to group test units.
+although you can see the names of the languages in the fanky heap example, the application does not use this in any way. These names are for my convenience only, to group test units.
 
 The program does not know anything about the test language, and only works with strings. Therefore, it is possible to request information about the "c" symbol for the European language, but there will be no result, however.
+
+Therefore, no language parsers or analysers are used in dictionary searches. Only unchangeable and specially defined forms in the dictionary will be found.
+
+Analyzers will be used in the older version of Fanki
