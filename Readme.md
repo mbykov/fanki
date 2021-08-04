@@ -73,6 +73,14 @@ ctrl+k - clear line
 
 v - (**not ctrl-v!**) - past arbitrary text
 
+## colors
+
+green - raw, show often
+
+yellow - show less often
+
+red - ripe, do not show, eat
+
 ## dictionaries:
 
 dictionaries have the same format of rows
