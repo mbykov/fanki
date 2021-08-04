@@ -43,16 +43,27 @@ $ fanki lush 02 -i ~/fanki-heap
 ```
 
 ## use arrows
-left / right - to move along the card
-down - next card
-'shift down - change card color from green to red, (from raw to ripe)
-shift left / right - move along a line to press \'d\', \'s\' or  \'v\' \n`
 
-ncontrols:
+**left / right** - to move along the card
+
+**down** - next card
+
+**shift down** - change card color from green to red, (from raw to ripe)
+
+**shift left / right** - move along a line to press \'d\', \'s\' or  \'v\' \n`
+
+## controls:
+
 d - wordform dictionary search
+
 s - symbol search (useful for chinese)
+
 h - help
+
 ctrl+a - jump to beginning of a line
+
 ctrl+l - clear screen
+
 ctrl+k - clear line
+
 v - (**not ctrl-v!**) - past arbitrary text
