@@ -4,6 +4,8 @@ yet another Anki clone, console app with blackjack
 
 helper module for the **diglossa**: https://github.com/mbykov/diglossa.git
 
+absolutely easily, in a minute, you can create a unit of Anki-like tests and dictionaries for them. And use them right in the console
+
 # Install
 
 ```
@@ -67,3 +69,16 @@ ctrl+l - clear screen
 ctrl+k - clear line
 
 v - (**not ctrl-v!**) - past arbitrary text
+
+## dictionaries:
+
+dictionaries have the same format of rows
+
+```
+好 = hǎo = good; well
+来 = lái = to come
+```
+
+but dictionaries should have "-dict" in a file name
+
+the closer to the file with the unit of tests, the earlier the dictionary is processed. Dictionaries at the heap root are processed last. Therefore, duplicate values in later (upper) dictionaries will not be counted.
