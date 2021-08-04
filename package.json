@@ -1,8 +1,9 @@
 {
-  "name": "fanki-cli",
-  "version": "0.5.1",
-  "description": "",
-  "main": "index.js",
+  "name": "fanki",
+  "productName": "fanki",
+  "version": "0.6.0",
+  "description": "yet another Anki clone, console app with blackjack",
+  "main": "bin/index.js",
   "bin": {
     "fanki": "bin/index.js"
   },
@@ -10,8 +11,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "mbykov <m.bykov@gmail.com>",
-  "license": "ISC",
+  "author": "M. Bykov <m.bykov@gmail.com>",
+  "homepage": "http://diglossa.org",
+  "license": "GPL-3.0",
   "dependencies": {
     "chalk": "^4.1.2",
     "clipboardy": "^2.3.0",
@@ -22,5 +24,12 @@
     "orthos": "^0.7.2",
     "pouchdb": "^7.2.2",
     "yargs": "^17.0.1"
+  },
+    "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbykov/fanki.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mbykov/fanki/issues"
   }
 }
