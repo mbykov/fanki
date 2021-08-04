@@ -1,7 +1,7 @@
 {
   "name": "fanki",
   "productName": "fanki",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "yet another Anki clone, console app with blackjack",
   "main": "bin/index.js",
   "bin": {
@@ -20,12 +20,13 @@
     "fs-extra": "^10.0.0",
     "json5": "^2.2.0",
     "langs": "^2.0.0",
+    "lookup-heap": "^0.3.0",
     "md5": "^2.3.0",
     "orthos": "^0.7.2",
     "pouchdb": "^7.2.2",
     "yargs": "^17.0.1"
   },
-    "repository": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/mbykov/fanki.git"
   },

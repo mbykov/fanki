@@ -2,7 +2,8 @@
 
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { lookupheap } from '../../heap.js/index.js'
+// import { lookupheap } from '../../heap.js/index.js'
+import { lookupheap } from 'lookup-heap'
 import { fanki } from '../lib/index.js'
 import fse from 'fs-extra'
 import os from 'os'
