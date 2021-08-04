@@ -1,10 +1,13 @@
-# book-fb2json
+# Fanki
 
 yet another Anki clone, console app with blackjack
 
 helper module for the **diglossa**: https://github.com/mbykov/diglossa.git
 
 absolutely easily, in a minute, you can create a unit of Anki-like tests and dictionaries for them. And use them right in the console
+
+![fanki](https://github.com/mbykov/fanki/blob/master/resources/fanki.png?raw=true "Fanki")
+
 
 # Install
 
