@@ -50,7 +50,7 @@ $ fanki lush 02 -i ~/fanki-heap
 
 **shift down** - change card color from green to red, (from raw to ripe)
 
-**shift left / right** - move along a line to press \'d\', \'s\' or  \'v\' \n`
+**shift left / right** - move along a line to press \'d\', \'s\' or  \'v\'
 
 ## controls:
 
