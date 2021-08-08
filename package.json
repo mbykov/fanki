@@ -1,7 +1,7 @@
 {
   "name": "fanki",
   "productName": "fanki",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "yet another Anki clone, console app with blackjack",
   "main": "bin/index.js",
   "bin": {
